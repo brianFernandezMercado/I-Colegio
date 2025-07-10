@@ -29,8 +29,19 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $hidden = [
+        'nombre_completo',
+        'username',
+        'email',
         'password',
-        'remember_token',
+        'celular',
+        'descripcion',
+        'calificacion',
+        'imagen',
+        'zona',
+        'experiencia',
+        'ci',
+        'estado',
+        'rol',
     ];
 
     /**
@@ -44,5 +55,20 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function subServicios()
+    {
+        return $this->belongsToMany(SubServicio::class, 'subcategorias_seleccionadas', 'user_id', 'sub_servicio_id');
+    }
+
+    public function agenda()
+    {
+        return $this->hasMany(AgendaUsuario::class, 'user_id');
+    }
+
+    public function categoria()
+    {
+        return $this->belongsTo(CategoriaServicio::class, 'categoria_id'); // si guardas la categoría del usuario en users.categoria_id
     }
 }
