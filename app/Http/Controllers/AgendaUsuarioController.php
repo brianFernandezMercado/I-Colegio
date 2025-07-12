@@ -10,8 +10,7 @@ class AgendaUsuarioController extends Controller
     public function index()
     {
         return AgendaUsuario::with('usuario')->get();
-    }gi
-
+    }
     public function store(Request $request)
     {
         return AgendaUsuario::create($request->all());
