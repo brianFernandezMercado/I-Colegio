@@ -11,7 +11,7 @@ class CategoriaServicio extends Model
 
     protected $table = 'categorias_servicios';
 
-    protected $fillable = ['nombre', 'descripcion', 'icono'];
+    protected $fillable = ['nombre', 'descripcion', 'icono', 'activo'];
 
     public function subServicios()
     {

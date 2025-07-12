@@ -32,3 +32,13 @@ Route::prefix('auth')->group(function () {
         Route::post('changestatus', [AuthController::class, 'changeStatus']);
     });
 });
+
+Route::prefix('category')->group(function () {
+        Route::middleware('auth:api')->group(function () {
+            Route::get('list', [CategoriaServicioController::class, 'getListCategory']);
+            Route::post('register', [CategoriaServicioController::class, 'registerCategory']);
+            Route::post('getCategory/{id}', [CategoriaServicioController::class, 'showCategory']);
+            Route::post('updateCategory/{id}', [CategoriaServicioController::class, 'updateCategory']);
+            Route::post('changeStatus/{id}', [CategoriaServicioController::class, 'changeStatus']);
+        });
+});

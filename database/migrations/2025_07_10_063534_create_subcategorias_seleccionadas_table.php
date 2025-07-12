@@ -19,6 +19,7 @@ return new class extends Migration
 
     $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
     $table->foreign('sub_servicio_id')->references('id')->on('sub_servicios')->onDelete('cascade');
+    $table->boolean('activo')->default(true);
 });
 
     }

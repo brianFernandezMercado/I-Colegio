@@ -17,6 +17,7 @@ return new class extends Migration
     $table->string('nombre');
     $table->text('descripcion')->nullable();
     $table->string('icono')->nullable();
+    $table->boolean('activo')->default(true);
     $table->timestamps();
 
     $table->foreign('categoria_servicio_id')->references('id')->on('categorias_servicios')->onDelete('cascade');

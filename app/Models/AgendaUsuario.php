@@ -12,7 +12,7 @@ class AgendaUsuario extends Model
     protected $table = 'agenda_usuarios';
 
     protected $fillable = [
-        'user_id', 'fecha', 'hora_inicio', 'hora_fin', 'estado'
+        'user_id', 'fecha', 'hora_inicio', 'hora_fin', 'estado','activo'
     ];
 
     public function usuario()
