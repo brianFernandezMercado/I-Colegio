@@ -11,8 +11,8 @@ class Departamento extends Model
 
     protected $table = 'departamentos';
 
-    protected $fillable = ['nombre', 'icono', 'pais_id'];
-
+    protected $fillable = ['nombre', 'icono', 'pais_id', 'activo'];
+    protected $hidden = ['created_at', 'updated_at'];
     public function pais()
     {
         return $this->belongsTo(Pais::class);

@@ -13,6 +13,8 @@ class CategoriaServicio extends Model
 
     protected $fillable = ['nombre', 'descripcion', 'icono', 'activo'];
 
+    protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
+
     public function subServicios()
     {
         return $this->hasMany(SubServicio::class, 'categoria_servicio_id');

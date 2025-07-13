@@ -16,6 +16,7 @@ return new class extends Migration
     $table->unsignedBigInteger('departamento_id');
     $table->string('nombre');
     $table->string('icono')->nullable();
+    $table->boolean('activo')->default(1);
     $table->timestamps();
 
     $table->foreign('departamento_id')->references('id')->on('departamentos')->onDelete('cascade');

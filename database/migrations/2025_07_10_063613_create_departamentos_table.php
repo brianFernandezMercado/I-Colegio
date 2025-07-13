@@ -16,6 +16,7 @@ return new class extends Migration
     $table->unsignedBigInteger('pais_id');
     $table->string('nombre');
     $table->string('icono')->nullable();
+    $table->boolean('activo')->default(1);
     $table->timestamps();
 
     $table->foreign('pais_id')->references('id')->on('paises')->onDelete('cascade');
