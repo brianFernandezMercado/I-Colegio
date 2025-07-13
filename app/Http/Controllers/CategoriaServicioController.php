@@ -38,25 +38,37 @@ class CategoriaServicioController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
-                'nombre' => 'required|string',
-                'descripcion' => 'string',
-                'icono' => 'string',
+                'nombre' => 'required|string|max:255',
+                'descripcion' => 'nullable|string',
+
             ], [
                 'nombre.required' => 'El nombre es obligatorio.',
+
             ]);
 
             if ($validator->fails()) {
                 return response()->json([
                     'status' => false,
-                    'message' => 'Error de validación.',
+                    'message' => 'Error de validación.',
                     'errors' => $validator->errors(),
                 ], 422);
             }
 
-            $categoria = CategoriaServicio::create($request->all());
+            $data = $request->only(['nombre', 'descripcion']);
+
+            // Procesar imagen si llega
+            if ($request->hasFile('icono')) {
+                $imagen = $request->file('icono');
+                $nombreArchivo = time() . '_' . preg_replace('/\s+/', '_', $imagen->getClientOriginalName());
+                $imagen->move(public_path('servicios'), $nombreArchivo);
+                $data['icono'] = url('servicios/' . $nombreArchivo);
+            }
+
+            $categoria = CategoriaServicio::create($data);
+
             return response()->json([
                 'status' => true,
-                'message' => 'Categoría creada correctamente.',
+                'message' => 'Categoría creada correctamente.',
                 'data' => $categoria,
             ], 201);
         } catch (QueryException | PDOException $e) {
@@ -64,18 +76,16 @@ class CategoriaServicioController extends Controller
                 'status' => false,
                 'message' => 'Error de conexión a la base de datos.',
                 'error' => env('APP_DEBUG') ? $e->getMessage() : null,
-                'token' => null,
-                'user' => [],
             ], 500);
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => false,
-                'message' => 'Error al crear categoría: ' . $th->getMessage(),
+                'message' => 'Error al crear categoría: ' . $th->getMessage(),
                 'data' => [],
-            ]);
-            //throw $th;
+            ], 500);
         }
     }
+
 
     public function showCategory($id)
     {
@@ -115,54 +125,59 @@ class CategoriaServicioController extends Controller
     }
 
     public function updateCategory(Request $request, $id)
-    {
-        try {
-            $categoria = CategoriaServicio::findOrFail($id);
+{
+    try {
+        $categoria = CategoriaServicio::findOrFail($id);
 
-            if (!$categoria) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Categoría no encontrada.',
-                    'data' => [],
-                ], 404);
-            }
-            $validator = Validator::make($request->all(), [
-                'nombre' => 'required|string',
-                'descripcion' => 'string',
-                'icono' => 'string',
-            ], [
-                'nombre.required' => 'El nombre es obligatorio.',
-            ]);
+        $validator = Validator::make($request->all(), [
+            'nombre' => 'required|string',
+            'descripcion' => 'nullable|string',
+            'icono' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
+        ], [
+            'nombre.required' => 'El nombre es obligatorio.',
+        ]);
 
-            if ($validator->fails()) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Error de validación.',
-                    'errors' => $validator->errors(),
-                ], 422);
-            }
-            $categoria->update($request->all());
-            return response()->json([
-                'status' => true,
-                'message' => 'Categoría actualizada correctamente.',
-                'data' => $categoria,
-            ], 200);
-        } catch (QueryException | PDOException $e) {
+        if ($validator->fails()) {
             return response()->json([
                 'status' => false,
-                'message' => 'Error de conexión a la base de datos.',
-                'error' => env('APP_DEBUG') ? $e->getMessage() : null,
-                'token' => null,
-                'user' => [],
-            ], 500);
-        } catch (\Throwable $th) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Error al actualizar categoría: ' . $th->getMessage(),
-                'data' => [],
-            ], 500);
+                'message' => 'Error de validación.',
+                'errors' => $validator->errors(),
+            ], 422);
         }
+        $data = $request->only(['nombre', 'descripcion']);
+        if ($request->hasFile('icono')) {
+            if ($categoria->icono && str_contains($categoria->icono, url('/servicios/'))) {
+                $rutaAnterior = public_path('servicios/' . basename($categoria->icono));
+                if (file_exists($rutaAnterior)) {
+                    unlink($rutaAnterior);
+                }
+            }
+            $imagen = $request->file('icono');
+            $nombreArchivo = time() . '_' . preg_replace('/\s+/', '_', $imagen->getClientOriginalName());
+            $imagen->move(public_path('servicios'), $nombreArchivo);
+            $data['icono'] = url('servicios/' . $nombreArchivo);
+        }
+        $categoria->update($data);
+        return response()->json([
+            'status' => true,
+            'message' => 'Categoría actualizada correctamente.',
+            'data' => $categoria,
+        ], 200);
+
+    } catch (QueryException | PDOException $e) {
+        return response()->json([
+            'status' => false,
+            'message' => 'Error de conexión a la base de datos.',
+            'error' => env('APP_DEBUG') ? $e->getMessage() : null,
+        ], 500);
+    } catch (\Throwable $th) {
+        return response()->json([
+            'status' => false,
+            'message' => 'Error al actualizar categoría: ' . $th->getMessage(),
+            'data' => [],
+        ], 500);
     }
+}
 
     public function changeStatus($id)
     {

@@ -43,7 +43,6 @@ class ProvinciaController extends Controller
             $validator = Validator::make($request->all(), [
                 'nombre' => 'required|string',
                 'descripcion' => 'string',
-                'icono' => 'string',
                 'departamento_id' => 'required|exists:categorias_servicios,id',
             ], [
                 'nombre.required' => 'El nombre es obligatorio.',
@@ -68,8 +67,15 @@ class ProvinciaController extends Controller
                 ], 409);
             }
 
+            $data = $request->only(['nombre', 'descripcion', 'departamento_id']);
 
-            $sub = Provincia::create($request->all());
+            if ($request->hasFile('icono')) {
+                $imagen = $request->file('icono');
+                $nombreArchivo = time() . '_' . preg_replace('/\s+/', '_', $imagen->getClientOriginalName());
+                $imagen->move(public_path('provincia'), $nombreArchivo);
+                $data['icono'] = url('provincia/' . $nombreArchivo);
+            }
+            $sub = Provincia::create($data);
             return response()->json([
                 'status' => true,
                 'message' => 'Provincia creado correctamente.',
@@ -141,8 +147,8 @@ class ProvinciaController extends Controller
             $validator = Validator::make($request->all(), [
                 'nombre' => 'required|string',
                 'descripcion' => 'string',
-                'icono' => 'string',
                 'departamento_id' => 'required|exists:departamentos,id',
+                'icono' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
             ], [
                 'nombre.required' => 'El nombre es obligatorio.',
                 'departamento_id.required' => 'La departamento es obligatoria.',
@@ -156,11 +162,21 @@ class ProvinciaController extends Controller
                     'errors' => $validator->errors(),
                 ], 422);
             }
-
-
-
             $sub = Provincia::findOrFail($id);
-            $sub->update($request->all());
+            $data = $request->only(['nombre', 'descripcion', 'departamento_id']);
+            if ($request->hasFile('icono')) {
+                if ($sub->icono && str_contains($sub->icono, url('/provincia/'))) {
+                    $rutaAnterior = public_path('provincia/' . basename($sub->icono));
+                    if (file_exists($rutaAnterior)) {
+                        unlink($rutaAnterior);
+                    }
+                }
+                $imagen = $request->file('icono');
+                $nombreArchivo = time() . '_' . preg_replace('/\s+/', '_', $imagen->getClientOriginalName());
+                $imagen->move(public_path('provincia'), $nombreArchivo);
+                $data['icono'] = url('provincia/' . $nombreArchivo);
+            }
+            $sub->update($data);
             return response()->json([
                 'status' => true,
                 'message' => 'Provincia actualizado correctamente.',

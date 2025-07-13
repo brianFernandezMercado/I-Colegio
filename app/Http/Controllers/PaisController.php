@@ -40,11 +40,10 @@ class PaisController extends Controller
         try {
             $validator = Validator::make($request->all(), [
                 'nombre' => 'required|string',
-                'icono' => 'string',
+
             ], [
                 'nombre.required' => 'El nombre es obligatorio.',
             ]);
-
             if ($validator->fails()) {
                 return response()->json([
                     'status' => false,
@@ -52,14 +51,19 @@ class PaisController extends Controller
                     'errors' => $validator->errors(),
                 ], 422);
             }
-
-            $pais = Pais::create($request->all());
+            $data = $request->only(['nombre']);
+            if ($request->hasFile('icono')) {
+                $imagen = $request->file('icono');
+                $nombreArchivo = time() . '_' . preg_replace('/\s+/', '_', $imagen->getClientOriginalName());
+                $imagen->move(public_path('pais'), $nombreArchivo);
+                $data['icono'] = url('pais/' . $nombreArchivo);
+            }
+            $pais = Pais::create($data);
             return response()->json([
                 'status' => true,
                 'message' => 'Pais creado correctamente.',
                 'data' => $pais,
             ], 201);
-
         } catch (QueryException | PDOException $e) {
             return response()->json([
                 'status' => false,
@@ -108,9 +112,10 @@ class PaisController extends Controller
         try {
             $validator = Validator::make($request->all(), [
                 'nombre' => 'required|string',
-                'icono' => 'string',
+                 'icono' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
             ], [
                 'nombre.required' => 'El nombre es obligatorio.',
+
             ]);
 
             if ($validator->fails()) {
@@ -120,9 +125,21 @@ class PaisController extends Controller
                     'errors' => $validator->errors(),
                 ], 422);
             }
-
             $pais = Pais::findOrFail($id);
-            $pais->update($request->all());
+            $data = $request->only(['nombre']);
+            if ($request->hasFile('icono')) {
+                if ($pais->icono && str_contains($pais->icono, url('/pais/'))) {
+                    $rutaAnterior = public_path('pais/' . basename($pais->icono));
+                    if (file_exists($rutaAnterior)) {
+                        unlink($rutaAnterior);
+                    }
+                }
+                $imagen = $request->file('icono');
+                $nombreArchivo = time() . '_' . preg_replace('/\s+/', '_', $imagen->getClientOriginalName());
+                $imagen->move(public_path('pais'), $nombreArchivo);
+                $data['icono'] = url('pais/' . $nombreArchivo);
+            }
+            $pais->update($data);
             return response()->json([
                 'status' => true,
                 'message' => 'Pais actualizado correctamente.',
