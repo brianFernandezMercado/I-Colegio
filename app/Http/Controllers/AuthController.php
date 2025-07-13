@@ -309,20 +309,21 @@ class AuthController extends Controller
                 'ci',
                 'estado'
             ]);
-
-            // Procesar imagen si llega
             if ($request->hasFile('imagen')) {
+                if ($user->imagen && str_contains($user->imagen, url('/imagenes/'))) {
+                    $rutaImagenAnterior = public_path('imagenes/' . basename($user->imagen));
+                    if (file_exists($rutaImagenAnterior)) {
+                        unlink($rutaImagenAnterior);
+                    }
+                }
                 $imagen = $request->file('imagen');
                 $nombreArchivo = time() . '_' . $imagen->getClientOriginalName();
                 $imagen->move(public_path('imagenes'), $nombreArchivo);
                 $data['imagen'] = url('imagenes/' . $nombreArchivo);
             }
-
-            // Cambiar contraseña si viene
             if ($request->filled('password')) {
                 $data['password'] = Hash::make($request->password);
             }
-
             $user->update($data);
 
             return response()->json([
@@ -379,6 +380,33 @@ class AuthController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'Error al actualizar el estado: ' . $th->getMessage(),
+                'data' => [],
+            ], 500);
+        }
+    }
+
+
+    public function getListUser()
+    {
+        try {
+            $users = User::all()->makeHidden(['password']);
+            return response()->json([
+                'status' => true,
+                'message' => 'Usuarios obtenidos correctamente',
+                'data' => $users,
+            ], 200);
+        } catch (QueryException | PDOException $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Error de conexión a la base de datos.',
+                'error' => env('APP_DEBUG') ? $e->getMessage() : null,
+                'token' => null,
+                'user' => [],
+            ], 500);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Error al obtener usuarios: ' . $th->getMessage(),
                 'data' => [],
             ], 500);
         }
