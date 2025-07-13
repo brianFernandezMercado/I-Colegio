@@ -16,7 +16,7 @@ class ProvinciaController extends Controller
         try {
             return response()->json([
                 'status' => true,
-                'data' => Provincia::all(),
+                'data' => Provincia::with('departamento')->get(),
                 'message' => 'provincias obtenidas correctamente',
             ], 200);
         } catch (QueryException | PDOException $e) {
@@ -36,7 +36,7 @@ class ProvinciaController extends Controller
         }
     }
 
-    public function registerPorvincia(Request $request)
+    public function registerProvincia(Request $request)
     {
         try {
 
@@ -93,7 +93,7 @@ class ProvinciaController extends Controller
         }
     }
 
-    public function showSubProvincia($id)
+    public function showProvincia($id)
     {
         try {
             $validator = Validator::make(['id' => $id], [
@@ -142,11 +142,11 @@ class ProvinciaController extends Controller
                 'nombre' => 'required|string',
                 'descripcion' => 'string',
                 'icono' => 'string',
-                'departamento_id' => 'required|exists:categorias_servicios,id',
+                'departamento_id' => 'required|exists:departamentos,id',
             ], [
                 'nombre.required' => 'El nombre es obligatorio.',
-                'departamento_id.required' => 'La provincia es obligatoria.',
-                'departamento_id.exists' => 'La provincia no existe.',
+                'departamento_id.required' => 'La departamento es obligatoria.',
+                'departamento_id.exists' => 'La departamento no existe.',
             ]);
 
             if ($validator->fails()) {
@@ -157,21 +157,7 @@ class ProvinciaController extends Controller
                 ], 422);
             }
 
-            $sub = Departamento::where('id', $request->departamento_id)->where('activo', 0)->first();
-            if ($sub) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'El departamento esta inactivo.',
-                    'data' => [],
-                ], 409);
-            }
-            if (!$sub) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'El departamento no existe.',
-                    'data' => [],
-                ], 409);
-            }
+
 
             $sub = Provincia::findOrFail($id);
             $sub->update($request->all());

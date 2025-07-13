@@ -7,6 +7,7 @@ use App\Http\Controllers\DepartamentoController;
 use App\Http\Controllers\ProvinciaController;
 use App\Http\Controllers\AgendaUsuarioController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\SubCategoriasSeleccionadasController;
 
 
 
@@ -51,6 +52,15 @@ Route::prefix('subcategory')->group(function () {
             Route::post('changeStatus/{id}', [SubServicioController::class, 'changeStatus']);
         });
 });
+Route::prefix('pais')->group(function () {
+        Route::middleware('auth:api')->group(function () {
+            Route::get('list', [PaisController::class, 'getListPais']);
+            Route::post('registerPais', [PaisController::class, 'registerPais']);
+            Route::post('getPais/{id}', [PaisController::class, 'showPais']);
+            Route::post('updatePais/{id}', [PaisController::class, 'updatePais']);
+            Route::post('changeStatus/{id}', [PaisController::class, 'changeStatus']);
+        });
+});
 Route::prefix('departamento')->group(function () {
         Route::middleware('auth:api')->group(function () {
             Route::get('list', [DepartamentoController::class, 'getListDepartamento']);
@@ -62,11 +72,20 @@ Route::prefix('departamento')->group(function () {
 });
 Route::prefix('provincia')->group(function () {
         Route::middleware('auth:api')->group(function () {
-            Route::get('list', [DepartamentoController::class, 'getListProvincia']);
-            Route::post('register', [DepartamentoController::class, 'registerProvincia']);
-            Route::post('getProvincia/{id}', [DepartamentoController::class, 'showProvincia']);
-            Route::post('updateProvincia/{id}', [DepartamentoController::class, 'updateProvincia']);
-            Route::post('changeStatus/{id}', [DepartamentoController::class, 'changeStatus']);
+            Route::get('list', [ProvinciaController::class, 'getListProvincia']);
+            Route::post('register', [ProvinciaController::class, 'registerProvincia']);
+            Route::post('getProvincia/{id}', [ProvinciaController::class, 'showProvincia']);
+            Route::post('updateProvincia/{id}', [ProvinciaController::class, 'updateProvincia']);
+            Route::post('changeStatus/{id}', [ProvinciaController::class, 'changeStatus']);
+        });
+});
+Route::prefix('SubCatSeleccion')->group(function () {
+        Route::middleware('auth:api')->group(function (): void {
+            Route::get('list', [SubCategoriasSeleccionadasController::class, 'getListSeleccionadas']);
+            Route::post('register', [SubCategoriasSeleccionadasController::class, 'registerSeleccionadas']);
+            Route::post('getSeleccionadas/{id}', [SubCategoriasSeleccionadasController::class, 'showSeleccionadas']);
+            Route::post('updateSeleccionadas/{id}', [SubCategoriasSeleccionadasController::class, 'updateSeleccionadas']);
+            Route::post('changeStatus/{id}', [SubCategoriasSeleccionadasController::class, 'changeStatus']);
         });
 });
 
