@@ -88,5 +88,14 @@ Route::prefix('SubCatSeleccion')->group(function () {
             Route::post('changeStatus/{id}', [SubCategoriasSeleccionadasController::class, 'changeStatus']);
         });
 });
+Route::prefix('agenda')->group(function () {
+        Route::middleware('auth:api')->group(function (): void {
+            Route::get('list', [AgendaUsuarioController::class, 'getListAgenda']);
+            Route::post('register', [AgendaUsuarioController::class, 'registerAgenda']);
+            Route::post('getAgendas/{id}', [AgendaUsuarioController::class, 'showAgenda']);
+            Route::post('updateAgenda/{id}', [AgendaUsuarioController::class, 'updateAgenda']);
+            Route::post('changeStatus/{id}', [AgendaUsuarioController::class, 'changeStatus']);
+        });
+});
 
 

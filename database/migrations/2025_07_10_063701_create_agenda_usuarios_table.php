@@ -17,7 +17,7 @@ return new class extends Migration
     $table->date('fecha');
     $table->time('hora_inicio');
     $table->time('hora_fin');
-    $table->enum('estado', ['disponible', 'reservado'])->default('disponible');
+    $table->enum('estado', ['disponible', 'reservado'])->default('reservado');
     $table->timestamps();
 
     $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
